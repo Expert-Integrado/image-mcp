@@ -5,6 +5,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import sharp from "sharp";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -234,6 +235,57 @@ server.registerTool(
     for (const f of [...images, ...(mask ? [mask] : [])]) await fs.access(f);
     const b64 = await provider.edit({ model, prompt, images, mask, n, size, quality });
     return ok(await saveImages(b64, prompt), model);
+  }
+);
+
+server.registerTool(
+  "convert_image",
+  {
+    title: "Converter/redimensionar imagem",
+    description: "Converte o formato (png/jpeg/webp/avif) e/ou redimensiona uma imagem local, sem usar API (grátis e instantâneo). Também serve para comprimir (parâmetro quality).",
+    inputSchema: {
+      image: z.string().describe("Caminho absoluto da imagem de entrada"),
+      format: z.enum(["png", "jpeg", "webp", "avif"]).optional().describe("Formato de saída. Omitido = mantém o original"),
+      width: z.number().int().positive().optional().describe("Largura máxima em px (mantém proporção, nunca amplia)"),
+      height: z.number().int().positive().optional().describe("Altura máxima em px (mantém proporção, nunca amplia)"),
+      quality: z.number().int().min(1).max(100).optional().describe("Qualidade/compressão para jpeg/webp/avif (padrão do sharp: 80)"),
+      output: z.string().optional().describe("Caminho de saída. Omitido = mesma pasta, mesmo nome com sufixo/extensão novos"),
+    },
+  },
+  async ({ image, format, width, height, quality, output }) => {
+    if (!format && !width && !height && !quality) {
+      throw new Error("Informe pelo menos format, width/height ou quality — senão não há o que converter.");
+    }
+    let img = sharp(image);
+    const ext = format || path.extname(image).slice(1).toLowerCase().replace("jpg", "jpeg") || "png";
+    if (width || height) img = img.resize({ width, height, fit: "inside", withoutEnlargement: true });
+    if (format || quality) img = img.toFormat(ext, quality ? { quality } : {});
+    let dest = output;
+    if (!dest) {
+      const base = path.join(path.dirname(image), path.basename(image, path.extname(image)));
+      dest = `${base}${width || height ? `-${width || ""}x${height || ""}` : "-convertida"}.${ext === "jpeg" ? "jpg" : ext}`;
+    }
+    await img.toFile(dest);
+    const kb = ((await fs.stat(dest)).size / 1024).toFixed(0);
+    return { content: [{ type: "text", text: `Imagem salva em ${dest} (${kb} KB)` }] };
+  }
+);
+
+server.registerTool(
+  "get_image_info",
+  {
+    title: "Informações da imagem",
+    description: "Retorna dimensões, formato, tamanho em disco e transparência de uma imagem local. Útil antes de editar, converter ou publicar.",
+    inputSchema: { image: z.string().describe("Caminho absoluto da imagem") },
+  },
+  async ({ image }) => {
+    const [meta, stat] = await Promise.all([sharp(image).metadata(), fs.stat(image)]);
+    return {
+      content: [{
+        type: "text",
+        text: `${meta.width}x${meta.height} px, formato ${meta.format}, ${(stat.size / 1024).toFixed(0)} KB, transparência: ${meta.hasAlpha ? "sim" : "não"}`,
+      }],
+    };
   }
 );
 

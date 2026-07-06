@@ -43,6 +43,7 @@ O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e r
 - *"Gere uma imagem de um escritório moderno minimalista, formato 16:9"*
 - *"Gere com o Nano Banana uma foto de produto de uma caneca azul em fundo branco"*
 - *"Edite a imagem output/foto.png: troque o fundo por uma praia ao pôr do sol"*
+- *"Converta essa imagem para webp"* / *"diminui essa imagem para 800px"* (grátis, sem API)
 - *"Quais modelos de imagem estão disponíveis?"*
 
 ## Formatos de imagem (padrões de mercado)
@@ -74,7 +75,7 @@ Exemplo: *"gere em 9:16 uma arte de stories anunciando nossa mentoria"*.
 
 ## Para quem é técnico
 
-- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `list_image_models`.
+- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `get_image_info`, `list_image_models`.
 - **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `output/`).
 - **Teste:** `npm test` (smoke test via stdio, não gasta API).
 - **Adicionar provedor/modelo:** em [server.js](server.js), crie um objeto com `generate()`/`edit()` retornando array de base64, registre em `PROVIDERS` e adicione os modelos em `MODELS`. Sem SDKs de provedor — só `fetch` nativo.

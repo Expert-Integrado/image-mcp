@@ -1,7 +1,10 @@
 // Smoke test: sobe o servidor via stdio e valida tools sem gastar API.
 import assert from "node:assert";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
@@ -15,7 +18,7 @@ await client.connect(new StdioClientTransport({
 
 const { tools } = await client.listTools();
 const names = tools.map((t) => t.name).sort();
-assert.deepStrictEqual(names, ["edit_image", "generate_image", "list_image_models"]);
+assert.deepStrictEqual(names, ["convert_image", "edit_image", "generate_image", "get_image_info", "list_image_models"]);
 
 const models = await client.callTool({ name: "list_image_models", arguments: {} });
 assert.match(models.content[0].text, /gpt-image-2 .*padrão/);
@@ -48,5 +51,20 @@ const genGoogle = await client.callTool({
 assert.strictEqual(genGoogle.isError, true);
 assert.match(genGoogle.content[0].text, /GEMINI_API_KEY/);
 
+// conversão local real: PNG 8x8 → webp redimensionado, sem API
+const tmpPng = path.join(os.tmpdir(), "image-mcp-smoke.png");
+await sharp({ create: { width: 8, height: 8, channels: 3, background: { r: 255, g: 0, b: 0 } } }).png().toFile(tmpPng);
+const conv = await client.callTool({
+  name: "convert_image",
+  arguments: { image: tmpPng, format: "webp", width: 4 },
+});
+assert.notStrictEqual(conv.isError, true, conv.content[0].text);
+const outFile = conv.content[0].text.match(/salva em (.*\.webp)/)?.[1];
+assert.ok(outFile && fs.existsSync(outFile), "arquivo convertido não existe");
+
+const info = await client.callTool({ name: "get_image_info", arguments: { image: outFile } });
+assert.match(info.content[0].text, /4x4 px, formato webp/);
+
 await client.close();
-console.log("smoke OK: 3 tools, modelos OpenAI+Google, formatos padrão validados, erro limpo sem chaves");
+for (const f of [tmpPng, outFile]) { try { fs.rmSync(f); } catch {} } // handle pode demorar a soltar no Windows
+console.log("smoke OK: 5 tools, modelos OpenAI+Google, formatos padrão, conversão local webp validada");
