@@ -7,11 +7,11 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import sharp from "sharp";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const SERVER_DIR = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = process.env.IMAGE_MCP_OUTPUT_DIR || path.join(SERVER_DIR, "output");
+// via npx o código roda do cache do npm — a saída vai para a pasta de imagens do usuário
+const OUTPUT_DIR = process.env.IMAGE_MCP_OUTPUT_DIR || path.join(os.homedir(), "Pictures", "image-mcp");
 
 // ---------- registro de modelos/provedores ----------
 

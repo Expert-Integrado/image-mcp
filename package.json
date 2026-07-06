@@ -1,14 +1,32 @@
 {
-  "name": "image-mcp",
+  "name": "@expertintegrado/image-mcp",
   "version": "1.0.0",
-  "description": "MCP local de geração e edição de imagens (OpenAI gpt-image-2, extensível a outros provedores)",
+  "description": "MCP de geração e edição de imagens (OpenAI GPT Image + Google Nano Banana), com conversão local e onboarding para não-técnicos",
   "type": "module",
   "main": "server.js",
+  "bin": {
+    "image-mcp": "server.js"
+  },
+  "files": [
+    "server.js",
+    "SETUP.md"
+  ],
   "scripts": {
     "start": "node server.js",
     "test": "node test-smoke.js"
   },
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Expert-Integrado/image-mcp.git"
+  },
+  "homepage": "https://github.com/Expert-Integrado/image-mcp#readme",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "sharp": "^0.35.3",

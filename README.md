@@ -1,6 +1,6 @@
 # 🎨 Image MCP — gere e edite imagens dentro do Claude Code
 
-Este projeto conecta o Claude Code aos melhores modelos de geração de imagem do mercado — **GPT Image 2 (OpenAI)** e **Nano Banana (Google)**. Depois de instalar, você simplesmente conversa: *"gere uma imagem de..."*, *"edite essa foto e troque o fundo..."* — e as imagens aparecem na pasta `output/`.
+Este projeto conecta o Claude Code aos melhores modelos de geração de imagem do mercado — **GPT Image 2 (OpenAI)** e **Nano Banana (Google)**. Depois de instalar, você simplesmente conversa: *"gere uma imagem de..."*, *"edite essa foto e troque o fundo..."* — e as imagens aparecem na sua pasta **Imagens/image-mcp**.
 
 Não precisa saber programar. A instalação é o Claude quem faz.
 
@@ -10,17 +10,15 @@ Não precisa saber programar. A instalação é o Claude quem faz.
 2. **Node.js** (versão LTS): baixe em [nodejs.org](https://nodejs.org), clique em avançar até concluir
 3. **Pelo menos uma chave de API** — veja "Como criar as chaves" abaixo (a do Google tem nível gratuito)
 
-## Instalação (1 passo)
+## Instalação (1 passo — nem precisa baixar nada)
 
-1. Baixe esta pasta (botão **Code → Download ZIP**, depois extraia) ou clone o repositório.
-2. Abra o Claude Code **dentro da pasta**.
-3. Cole este prompt e aperte Enter:
+Abra o Claude Code em qualquer pasta, cole este prompt e aperte Enter:
 
 ```
-Leia o arquivo SETUP.md desta pasta e siga as instruções para instalar o image-mcp para mim. Me peça o que precisar.
+Leia https://raw.githubusercontent.com/Expert-Integrado/image-mcp/main/SETUP.md e siga as instruções para instalar o MCP de imagens da Expert para mim. Me peça o que precisar.
 ```
 
-O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e reabra o Claude Code e teste: *"gere uma imagem de teste de um abacaxi de óculos escuros"*.
+O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e reabra o Claude Code e teste: *"gere uma imagem de teste de um abacaxi de óculos escuros"*. As imagens geradas ficam na sua pasta **Imagens/image-mcp**.
 
 ## Como criar as chaves
 
@@ -42,7 +40,7 @@ O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e r
 
 - *"Gere uma imagem de um escritório moderno minimalista, formato 16:9"*
 - *"Gere com o Nano Banana uma foto de produto de uma caneca azul em fundo branco"*
-- *"Edite a imagem output/foto.png: troque o fundo por uma praia ao pôr do sol"*
+- *"Edite a foto do produto que está em Imagens/image-mcp: troque o fundo por uma praia ao pôr do sol"*
 - *"Converta essa imagem para webp"* / *"diminui essa imagem para 800px"* (grátis, sem API)
 - *"Quais modelos de imagem estão disponíveis?"*
 
@@ -75,8 +73,9 @@ Exemplo: *"gere em 9:16 uma arte de stories anunciando nossa mentoria"*.
 
 ## Para quem é técnico
 
+- **Instalação direta:** `claude mcp add --scope user -e OPENAI_API_KEY=... image-mcp -- npx -y @expertintegrado/image-mcp`
 - **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `get_image_info`, `list_image_models`.
-- **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `output/`).
-- **Teste:** `npm test` (smoke test via stdio, não gasta API).
+- **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `~/Pictures/image-mcp`).
+- **Teste:** clone o repo e rode `npm install && npm test` (smoke test via stdio, não gasta API).
 - **Adicionar provedor/modelo:** em [server.js](server.js), crie um objeto com `generate()`/`edit()` retornando array de base64, registre em `PROVIDERS` e adicione os modelos em `MODELS`. Sem SDKs de provedor — só `fetch` nativo.
 - **Hospedar online (futuro):** trocar `StdioServerTransport` por Streamable HTTP; em Cloudflare Workers, usar o template de MCP da plataforma e mover as chaves para secrets.
