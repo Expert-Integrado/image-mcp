@@ -45,6 +45,21 @@ O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e r
 - *"Edite a imagem output/foto.png: troque o fundo por uma praia ao pôr do sol"*
 - *"Quais modelos de imagem estão disponíveis?"*
 
+## Formatos de imagem (padrões de mercado)
+
+Se você não disser o formato, o Claude vai perguntar. Estes são os padrões disponíveis:
+
+| Formato | Uso mais comum |
+|---|---|
+| `1:1` quadrado | Post de feed, avatar, foto de produto |
+| `4:5` vertical | Post de feed do Instagram |
+| `9:16` vertical | Stories, Reels, TikTok, wallpaper de celular |
+| `16:9` horizontal | YouTube, apresentações, paisagem |
+| `3:2` / `2:3` | Fotografia horizontal / vertical e pôster |
+| `3:1` | Banner, capa de site |
+
+Exemplo: *"gere em 9:16 uma arte de stories anunciando nossa mentoria"*.
+
 ## Modelos disponíveis e custo aproximado
 
 | Modelo | Quando usar | Custo aprox./imagem* |

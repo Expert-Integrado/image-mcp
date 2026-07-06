@@ -25,6 +25,20 @@ const MODELS = {
 
 const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
 
+// Formatos padrão de mercado. openai = resolução concreta (WxH múltiplo de 16);
+// nos modelos Google a proporção vai direto como aspectRatio.
+const FORMATS = {
+  "1:1": { openai: "1024x1024", uso: "quadrado — feed, avatar, foto de produto" },
+  "4:5": { openai: "1024x1280", uso: "vertical — post de feed Instagram" },
+  "9:16": { openai: "864x1536", uso: "stories, reels, TikTok, wallpaper de celular" },
+  "16:9": { openai: "1536x864", uso: "YouTube, apresentações, paisagem" },
+  "3:2": { openai: "1536x1024", uso: "fotografia horizontal" },
+  "2:3": { openai: "1024x1536", uso: "fotografia vertical, pôster" },
+  "3:1": { openai: "1920x640", uso: "banner, capa de site" },
+};
+
+const FORMATS_HELP = Object.entries(FORMATS).map(([k, f]) => `"${k}" (${f.uso})`).join(", ");
+
 const openai = {
   apiKey: () => {
     const key = process.env.OPENAI_API_KEY;
@@ -39,9 +53,17 @@ const openai = {
     return body;
   },
 
+  resolveSize(size) {
+    if (!size || size === "auto") return undefined;
+    if (/^\d+x\d+$/.test(size)) return size;
+    if (FORMATS[size]) return FORMATS[size].openai;
+    throw new Error(`Formato não suportado: "${size}". Use "LARGURAxALTURA" ou um dos formatos: ${Object.keys(FORMATS).join(", ")}.`);
+  },
+
   async generate({ model, prompt, n, size, quality }) {
     const body = { model, prompt, n };
-    if (size !== "auto") body.size = size;
+    const resolved = this.resolveSize(size);
+    if (resolved) body.size = resolved;
     if (quality !== "auto") body.quality = quality;
     const data = await this.request("https://api.openai.com/v1/images/generations", {
       method: "POST",
@@ -56,7 +78,8 @@ const openai = {
     form.append("model", model);
     form.append("prompt", prompt);
     form.append("n", String(n));
-    if (size !== "auto") form.append("size", size);
+    const resolved = this.resolveSize(size);
+    if (resolved) form.append("size", resolved);
     if (quality !== "auto") form.append("quality", quality);
     for (const file of images) {
       const ext = path.extname(file).toLowerCase();
@@ -171,7 +194,7 @@ const server = new McpServer({ name: "image-mcp", version: "1.0.0" });
 
 const common = {
   model: z.enum(Object.keys(MODELS)).default("gpt-image-2").describe('Modelo de imagem. "Nano Banana" = modelos Google (gemini-*-image). Use list_image_models para ver todos'),
-  size: z.string().default("auto").describe('Modelos OpenAI: "LARGURAxALTURA", ex. "1024x1024", "1536x1024" (gpt-image-2 aceita qualquer WxH múltiplo de 16, aspecto 1:3 a 3:1). Modelos Google: proporção e/ou resolução, ex. "16:9", "2K", "16:9 2K". "auto" = padrão do modelo'),
+  size: z.string().default("auto").describe(`Formato da imagem. Prefira os padrões de mercado, que funcionam em todos os modelos: ${FORMATS_HELP}. Avançado — OpenAI também aceita "LARGURAxALTURA" (WxH múltiplo de 16); Google também aceita resolução "1K"|"2K"|"4K" junto da proporção, ex. "16:9 2K"`),
   quality: z.enum(["low", "medium", "high", "auto"]).default("auto").describe("Qualidade (apenas modelos OpenAI; ignorada nos Google — use a resolução em size)"),
   n: z.number().int().min(1).max(4).default(1).describe("Quantidade de imagens"),
 };
@@ -180,7 +203,7 @@ server.registerTool(
   "generate_image",
   {
     title: "Gerar imagem",
-    description: "Gera imagem(ns) a partir de um prompt de texto e salva em disco, retornando os caminhos dos arquivos.",
+    description: `Gera imagem(ns) a partir de um prompt de texto e salva em disco, retornando os caminhos dos arquivos. IMPORTANTE: se o usuário não disse o formato/proporção da imagem, pergunte antes de gerar, oferecendo os padrões de mercado: ${FORMATS_HELP}.`,
     inputSchema: {
       prompt: z.string().min(1).describe("Descrição da imagem desejada"),
       ...common,

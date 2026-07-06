@@ -26,6 +26,21 @@ const gen = await client.callTool({ name: "generate_image", arguments: { prompt:
 assert.strictEqual(gen.isError, true);
 assert.match(gen.content[0].text, /OPENAI_API_KEY/);
 
+// formato padrão aceito (passa da validação, para só na falta de chave)
+const genPreset = await client.callTool({
+  name: "generate_image",
+  arguments: { prompt: "teste", size: "9:16" },
+});
+assert.match(genPreset.content[0].text, /OPENAI_API_KEY/);
+
+// formato desconhecido: erro claro listando os padrões
+const genBadSize = await client.callTool({
+  name: "generate_image",
+  arguments: { prompt: "teste", size: "7:3" },
+});
+assert.strictEqual(genBadSize.isError, true);
+assert.match(genBadSize.content[0].text, /Formato não suportado.*9:16/);
+
 const genGoogle = await client.callTool({
   name: "generate_image",
   arguments: { prompt: "teste", model: "gemini-3.1-flash-image" },
@@ -34,4 +49,4 @@ assert.strictEqual(genGoogle.isError, true);
 assert.match(genGoogle.content[0].text, /GEMINI_API_KEY/);
 
 await client.close();
-console.log("smoke OK: 3 tools, modelos OpenAI+Google listados, erro limpo sem chaves");
+console.log("smoke OK: 3 tools, modelos OpenAI+Google, formatos padrão validados, erro limpo sem chaves");
