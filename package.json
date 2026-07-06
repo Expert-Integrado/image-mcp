@@ -1,0 +1,16 @@
+{
+  "name": "image-mcp",
+  "version": "1.0.0",
+  "description": "MCP local de geração e edição de imagens (OpenAI gpt-image-2, extensível a outros provedores)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-smoke.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}

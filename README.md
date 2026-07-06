@@ -1,0 +1,66 @@
+# 🎨 Image MCP — gere e edite imagens dentro do Claude Code
+
+Este projeto conecta o Claude Code aos melhores modelos de geração de imagem do mercado — **GPT Image 2 (OpenAI)** e **Nano Banana (Google)**. Depois de instalar, você simplesmente conversa: *"gere uma imagem de..."*, *"edite essa foto e troque o fundo..."* — e as imagens aparecem na pasta `output/`.
+
+Não precisa saber programar. A instalação é o Claude quem faz.
+
+## O que você precisa antes
+
+1. **Claude Code** instalado ([claude.com/claude-code](https://claude.com/claude-code))
+2. **Node.js** (versão LTS): baixe em [nodejs.org](https://nodejs.org), clique em avançar até concluir
+3. **Pelo menos uma chave de API** — veja "Como criar as chaves" abaixo (a do Google tem nível gratuito)
+
+## Instalação (1 passo)
+
+1. Baixe esta pasta (botão **Code → Download ZIP**, depois extraia) ou clone o repositório.
+2. Abra o Claude Code **dentro da pasta**.
+3. Cole este prompt e aperte Enter:
+
+```
+Leia o arquivo SETUP.md desta pasta e siga as instruções para instalar o image-mcp para mim. Me peça o que precisar.
+```
+
+O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e reabra o Claude Code e teste: *"gere uma imagem de teste de um abacaxi de óculos escuros"*.
+
+## Como criar as chaves
+
+### Google — Nano Banana (tem nível gratuito, comece por aqui)
+
+1. Acesse [aistudio.google.com/apikey](https://aistudio.google.com/apikey) e entre com sua conta Google.
+2. Clique em **Create API key** (Criar chave de API).
+3. Copie a chave (começa com `AIza`) e guarde num lugar seguro.
+
+### OpenAI — GPT Image (pago, precisa de créditos)
+
+1. Crie conta / faça login em [platform.openai.com](https://platform.openai.com).
+2. Em **Settings → Billing**, adicione créditos (US$ 5 já rende muitas imagens).
+3. Em [platform.openai.com/api-keys](https://platform.openai.com/api-keys), clique em **Create new secret key** e copie a chave (começa com `sk-`).
+
+> ⚠️ **Chave de API é como senha de banco**: não compartilhe, não poste em grupo, não mande print.
+
+## Como usar (exemplos de pedidos)
+
+- *"Gere uma imagem de um escritório moderno minimalista, formato 16:9"*
+- *"Gere com o Nano Banana uma foto de produto de uma caneca azul em fundo branco"*
+- *"Edite a imagem output/foto.png: troque o fundo por uma praia ao pôr do sol"*
+- *"Quais modelos de imagem estão disponíveis?"*
+
+## Modelos disponíveis e custo aproximado
+
+| Modelo | Quando usar | Custo aprox./imagem* |
+|---|---|---|
+| `gpt-image-2` (padrão) | Composições complexas, texto dentro da imagem | US$ 0,01–0,25 (varia com a qualidade) |
+| `gemini-3.1-flash-image` — Nano Banana 2 | Rápido e barato, ótimo para volume | US$ 0,03–0,06 |
+| `gemini-3-pro-image` — Nano Banana Pro | Máxima qualidade e controle criativo | a partir de US$ 0,06 |
+
+*Valores aproximados — confira as tabelas oficiais de preço da OpenAI e do Google.
+
+---
+
+## Para quem é técnico
+
+- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `list_image_models`.
+- **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `output/`).
+- **Teste:** `npm test` (smoke test via stdio, não gasta API).
+- **Adicionar provedor/modelo:** em [server.js](server.js), crie um objeto com `generate()`/`edit()` retornando array de base64, registre em `PROVIDERS` e adicione os modelos em `MODELS`. Sem SDKs de provedor — só `fetch` nativo.
+- **Hospedar online (futuro):** trocar `StdioServerTransport` por Streamable HTTP; em Cloudflare Workers, usar o template de MCP da plataforma e mover as chaves para secrets.
