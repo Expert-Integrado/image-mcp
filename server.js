@@ -204,7 +204,7 @@ server.registerTool(
   "generate_image",
   {
     title: "Gerar imagem",
-    description: `Gera imagem(ns) a partir de um prompt de texto e salva em disco, retornando os caminhos dos arquivos. IMPORTANTE: se o usuário não disse o formato/proporção da imagem, pergunte antes de gerar, oferecendo os padrões de mercado: ${FORMATS_HELP}.`,
+    description: `Gera imagem(ns) a partir de um prompt de texto e salva em disco, retornando os caminhos dos arquivos. Se o usuário quer partir de uma imagem existente (editar, variar, usar como referência), use edit_image. IMPORTANTE: se o usuário não disse o formato/proporção da imagem, pergunte antes de gerar, oferecendo os padrões de mercado: ${FORMATS_HELP}.`,
     inputSchema: {
       prompt: z.string().min(1).describe("Descrição da imagem desejada"),
       ...common,
@@ -220,8 +220,8 @@ server.registerTool(
 server.registerTool(
   "edit_image",
   {
-    title: "Editar imagem",
-    description: "Edita imagem(ns) existente(s) a partir de um prompt. Aceita múltiplas imagens de referência e máscara opcional (PNG com alfa marcando a região a editar). Salva o resultado em disco e retorna os caminhos.",
+    title: "Editar imagem / gerar com referência",
+    description: "Use sempre que houver imagem(ns) de partida: editar/alterar uma imagem existente, gerar uma nova baseada em referência(s), combinar elementos de várias imagens, transferir estilo, ou variações de um produto/personagem. Aceita múltiplas imagens de referência e máscara opcional (PNG com alfa marcando a região a editar, apenas modelos OpenAI). Salva o resultado em disco e retorna os caminhos.",
     inputSchema: {
       prompt: z.string().min(1).describe("Descrição da edição desejada"),
       images: z.array(z.string()).min(1).describe("Caminhos absolutos das imagens de entrada (png/jpg/webp)"),
