@@ -12,8 +12,9 @@ await client.connect(new StdioClientTransport({
 }));
 
 const { tools } = await client.listTools();
-assert.strictEqual(tools.length, 5);
+assert.strictEqual(tools.length, 6);
+assert.ok(tools.some((t) => t.name === "host_image"), "host_image ausente no pacote publicado");
 const models = await client.callTool({ name: "list_image_models", arguments: {} });
 assert.match(models.content[0].text, /gpt-image-2/);
 await client.close();
-console.log("npx OK: pacote publicado sobe e responde com 5 tools");
+console.log("npx OK: pacote publicado sobe e responde com 6 tools (incl. host_image)");
