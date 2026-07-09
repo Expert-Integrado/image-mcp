@@ -42,7 +42,10 @@ O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e r
 - *"Gere com o Nano Banana uma foto de produto de uma caneca azul em fundo branco"*
 - *"Edite a foto do produto que está em Imagens/image-mcp: troque o fundo por uma praia ao pôr do sol"*
 - *"Converta essa imagem para webp"* / *"diminui essa imagem para 800px"* (grátis, sem API)
+- *"Gere um link público dessa imagem"* — hospeda de graça e devolve a URL, para plataformas que pedem o link da imagem em vez do arquivo
 - *"Quais modelos de imagem estão disponíveis?"*
+
+> 🔗 **Sobre o link público:** por padrão o link é permanente (catbox.moe) e qualquer pessoa com ele acessa a imagem — não hospede conteúdo sensível. Se quiser um link que expira sozinho, peça: *"gere um link temporário de 24h"*.
 
 ## Formatos de imagem (padrões de mercado)
 
@@ -74,7 +77,7 @@ Exemplo: *"gere em 9:16 uma arte de stories anunciando nossa mentoria"*.
 ## Para quem é técnico
 
 - **Instalação direta:** `claude mcp add --scope user -e OPENAI_API_KEY=... image-mcp -- npx -y @expertintegrado/image-mcp`
-- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `get_image_info`, `list_image_models`.
+- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `get_image_info`, `host_image` (upload gratuito para catbox.moe permanente ou litterbox temporário 1h–72h, sem API key, com fallback), `list_image_models`.
 - **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `~/Pictures/image-mcp`).
 - **Teste:** clone o repo e rode `npm install && npm test` (smoke test via stdio, não gasta API).
 - **Adicionar provedor/modelo:** em [server.js](server.js), crie um objeto com `generate()`/`edit()` retornando array de base64, registre em `PROVIDERS` e adicione os modelos em `MODELS`. Sem SDKs de provedor — só `fetch` nativo.

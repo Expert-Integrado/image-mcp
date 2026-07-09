@@ -184,14 +184,33 @@ function ok(paths, model) {
   return {
     content: [{
       type: "text",
-      text: `${paths.length} imagem(ns) gerada(s) com ${model}:\n${paths.join("\n")}\n\nUse a ferramenta Read no caminho para visualizar.`,
+      text: `${paths.length} imagem(ns) gerada(s) com ${model}:\n${paths.join("\n")}\n\nUse a ferramenta Read no caminho para visualizar. Se precisar de um link público (URL), use host_image.`,
     }],
   };
 }
 
+// ---------- hospedagem gratuita (link público) ----------
+// catbox.moe (permanente) e litterbox (temporário) — sem cadastro nem API key.
+// ponytail: são da mesma infra; se ambos caírem, o erro orienta tentar mais tarde.
+
+async function catboxUpload(endpoint, file, extra = {}) {
+  const form = new FormData();
+  form.append("reqtype", "fileupload");
+  for (const [k, v] of Object.entries(extra)) form.append(k, v);
+  const ext = path.extname(file).toLowerCase();
+  form.append("fileToUpload", new Blob([await fs.readFile(file)], { type: MIME[ext] || "application/octet-stream" }), path.basename(file));
+  const res = await fetch(endpoint, { method: "POST", body: form, signal: AbortSignal.timeout(120_000) });
+  const text = (await res.text()).trim();
+  if (!res.ok || !/^https?:\/\/\S+$/.test(text)) throw new Error(`${res.status}: ${text.slice(0, 300) || "resposta vazia"}`);
+  return text;
+}
+
+const uploadForever = (file) => catboxUpload("https://catbox.moe/user/api.php", file);
+const uploadTemp = (file, time) => catboxUpload("https://litterbox.catbox.moe/resources/internals/api.php", file, { time });
+
 // ---------- servidor MCP ----------
 
-const server = new McpServer({ name: "image-mcp", version: "1.0.0" });
+const server = new McpServer({ name: "image-mcp", version: "1.1.0" });
 
 const common = {
   model: z.enum(Object.keys(MODELS)).default("gpt-image-2").describe('Modelo de imagem. "Nano Banana" = modelos Google (gemini-*-image). Use list_image_models para ver todos'),
@@ -235,6 +254,38 @@ server.registerTool(
     for (const f of [...images, ...(mask ? [mask] : [])]) await fs.access(f);
     const b64 = await provider.edit({ model, prompt, images, mask, n, size, quality });
     return ok(await saveImages(b64, prompt), model);
+  }
+);
+
+server.registerTool(
+  "host_image",
+  {
+    title: "Hospedar imagem (link público)",
+    description: "Sobe imagem(ns) local(is) para hospedagem gratuita e retorna a URL pública direta — para plataformas que precisam do LINK da imagem, não do arquivo. Sem cadastro nem API key. Padrão: link permanente (catbox.moe); use expires para link temporário (litterbox). Atenção: qualquer pessoa com o link acessa a imagem — não hospede conteúdo sensível/confidencial.",
+    inputSchema: {
+      images: z.array(z.string()).min(1).describe("Caminhos absolutos das imagens locais (png/jpg/webp)"),
+      expires: z.enum(["never", "1h", "12h", "24h", "72h"]).default("never").describe('Validade do link. "never" = permanente; os demais expiram automaticamente'),
+    },
+  },
+  async ({ images, expires }) => {
+    for (const f of images) await fs.access(f);
+    const lines = [];
+    for (const file of images) {
+      const name = path.basename(file);
+      if (expires !== "never") {
+        lines.push(`${name} → ${await uploadTemp(file, expires)} (expira em ${expires})`);
+        continue;
+      }
+      try {
+        lines.push(`${name} → ${await uploadForever(file)} (permanente)`);
+      } catch (e) {
+        let url;
+        try { url = await uploadTemp(file, "72h"); }
+        catch (e2) { throw new Error(`Falha ao hospedar ${name}: catbox.moe (${e.message}) e litterbox (${e2.message}) indisponíveis. Tente novamente mais tarde.`); }
+        lines.push(`${name} → ${url} (serviço permanente indisponível — link TEMPORÁRIO, expira em 72h)`);
+      }
+    }
+    return { content: [{ type: "text", text: lines.join("\n") }] };
   }
 );
 

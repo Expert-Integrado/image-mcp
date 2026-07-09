@@ -18,7 +18,7 @@ await client.connect(new StdioClientTransport({
 
 const { tools } = await client.listTools();
 const names = tools.map((t) => t.name).sort();
-assert.deepStrictEqual(names, ["convert_image", "edit_image", "generate_image", "get_image_info", "list_image_models"]);
+assert.deepStrictEqual(names, ["convert_image", "edit_image", "generate_image", "get_image_info", "host_image", "list_image_models"]);
 
 const models = await client.callTool({ name: "list_image_models", arguments: {} });
 assert.match(models.content[0].text, /gpt-image-2 .*padrão/);
@@ -65,6 +65,13 @@ assert.ok(outFile && fs.existsSync(outFile), "arquivo convertido não existe");
 const info = await client.callTool({ name: "get_image_info", arguments: { image: outFile } });
 assert.match(info.content[0].text, /4x4 px, formato webp/);
 
+// host_image: arquivo inexistente falha antes de qualquer upload (sem rede)
+const host = await client.callTool({
+  name: "host_image",
+  arguments: { images: [path.join(os.tmpdir(), "nao-existe-image-mcp.png")] },
+});
+assert.strictEqual(host.isError, true);
+
 await client.close();
 for (const f of [tmpPng, outFile]) { try { fs.rmSync(f); } catch {} } // handle pode demorar a soltar no Windows
-console.log("smoke OK: 5 tools, modelos OpenAI+Google, formatos padrão, conversão local webp validada");
+console.log("smoke OK: 6 tools, modelos OpenAI+Google, formatos padrão, conversão local webp, host_image validado");
