@@ -1,5 +1,7 @@
 # 🎨 Image MCP — gere e edite imagens dentro do Claude Code
 
+**[→ Como funciona o Image MCP](https://expert-integrado.github.io/image-mcp/)** — a página do projeto, com o sistema explicado visualmente.
+
 Este projeto conecta o Claude Code aos melhores modelos de geração de imagem do mercado — **GPT Image 2 (OpenAI)** e **Nano Banana (Google)**. Depois de instalar, você simplesmente conversa: *"gere uma imagem de..."*, *"edite essa foto e troque o fundo..."* — e as imagens aparecem na sua pasta **Imagens/image-mcp**.
 
 Não precisa saber programar. A instalação é o Claude quem faz.
@@ -14,11 +16,24 @@ Não precisa saber programar. A instalação é o Claude quem faz.
 
 Abra o Claude Code em qualquer pasta, cole este prompt e aperte Enter:
 
-```
-Leia https://raw.githubusercontent.com/Expert-Integrado/image-mcp/main/SETUP.md e siga as instruções para instalar o MCP de imagens da Expert para mim. Me peça o que precisar.
+```text
+Leia https://raw.githubusercontent.com/Expert-Integrado/image-mcp/main/SETUP.md e instale o servidor MCP de imagens da Expert Integrado para mim, seguindo exatamente este protocolo:
+
+1) PRÉ-REQUISITOS: verifique node --version (precisa ser 20 ou superior) e claude --version. Se faltar algo, me oriente a instalar (nodejs.org, versão LTS) e pare até eu confirmar.
+2) PROVEDORES: me pergunte quais vou usar — Google (Nano Banana, tem nível gratuito), OpenAI (GPT Image, pago) ou ambos.
+3) CHAVES (etapas de navegador): para CADA chave, me pergunte com botões (AskUserQuestion): "Essa etapa é no navegador. Quer que eu faça pra você?", com as opções:
+   - "Sim, automatiza" (padrão): use o Playwright MCP para abrir a página e me guiar até criar/copiar a chave; se o Playwright MCP não estiver instalado, instale antes com: claude mcp add playwright -- npx -y @playwright/mcp@latest
+   - "Com Claude in Chrome", se eu tiver a extensão instalada
+   - "Faço manualmente": me passe o passo a passo numerado e aguarde eu colar a chave.
+   Quem faz login sou EU — nunca me peça senha, código ou 2FA no chat.
+   URLs reais: Google https://aistudio.google.com/apikey | OpenAI https://platform.openai.com/api-keys (antes, créditos em Settings → Billing).
+4) CUSTO: antes de concluir, me avise que cada imagem gerada consome créditos da MINHA chave (OpenAI ~US$ 0,01–0,25/imagem; Google tem nível gratuito limitado, depois ~US$ 0,03–0,06) e espere meu OK.
+5) VALIDAÇÃO SEM CUSTO: teste cada chave antes de registrar — OpenAI: GET https://api.openai.com/v1/models (header Authorization: Bearer); Google: GET https://generativelanguage.googleapis.com/v1beta/models (header x-goog-api-key). HTTP 200 = chave válida; 401/403 = refazer a chave. Nunca repita a chave no chat, nunca grave em arquivo, nunca use echo/print com ela.
+6) REGISTRO: claude mcp add --scope user -e GEMINI_API_KEY=<chave> -e OPENAI_API_KEY=<chave> image-mcp -- npx -y @expertintegrado/image-mcp (inclua só as envs das chaves que eu forneci). Segredos ficam só na configuração local do Claude Code ou em .env local — nunca em repositório, mensagem ou log.
+7) TESTE FINAL: me peça para fechar e reabrir o Claude Code e testar com "gere uma imagem de teste de um abacaxi de óculos escuros" (me lembrando que isso já consome crédito ou nível gratuito). Termine com um resumo: o que foi instalado, onde as imagens ficam salvas (Imagens/image-mcp) e 3 exemplos de pedidos.
 ```
 
-O Claude instala tudo, pede suas chaves e configura sozinho. No final, feche e reabra o Claude Code e teste: *"gere uma imagem de teste de um abacaxi de óculos escuros"*. As imagens geradas ficam na sua pasta **Imagens/image-mcp**.
+O Claude instala tudo, oferece fazer as etapas de navegador por você, valida suas chaves sem custo e configura sozinho. No final, feche e reabra o Claude Code e teste: *"gere uma imagem de teste de um abacaxi de óculos escuros"*. As imagens geradas ficam na sua pasta **Imagens/image-mcp**.
 
 ## Como criar as chaves
 
