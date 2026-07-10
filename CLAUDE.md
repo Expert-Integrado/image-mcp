@@ -4,7 +4,7 @@
 
 Servidor MCP local (stdio, Node.js >= 20) de geração e edição de imagens, publicado no npm como `@expertintegrado/image-mcp`. Um único `server.js`, sem SDK de provedor (só `fetch` nativo). Provedores: OpenAI (GPT Image 2/1/1-mini) e Google (Nano Banana — modelos `gemini-*-image`).
 
-- **Tools:** `generate_image`, `edit_image`, `convert_image`, `get_image_info`, `host_image`, `list_image_models`.
+- **Tools:** `generate_image`, `edit_image`, `convert_image`, `upscale_image`, `get_image_info`, `host_image`, `list_image_models`.
 - **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional; padrão `~/Pictures/image-mcp`).
 - **Testes:** `npm install && npm test` (smoke via stdio, não gasta API). `node test-npx.js` valida o pacote publicado no npm.
 - **Página do projeto:** https://expert-integrado.github.io/image-mcp/
