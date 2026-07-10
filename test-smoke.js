@@ -18,7 +18,7 @@ await client.connect(new StdioClientTransport({
 
 const { tools } = await client.listTools();
 const names = tools.map((t) => t.name).sort();
-assert.deepStrictEqual(names, ["convert_image", "edit_image", "generate_image", "get_image_info", "host_image", "list_image_models"]);
+assert.deepStrictEqual(names, ["convert_image", "edit_image", "generate_image", "get_image_info", "host_image", "list_image_models", "upscale_image"]);
 
 const models = await client.callTool({ name: "list_image_models", arguments: {} });
 assert.match(models.content[0].text, /gpt-image-2 .*padrão/);
@@ -65,6 +65,33 @@ assert.ok(outFile && fs.existsSync(outFile), "arquivo convertido não existe");
 const info = await client.callTool({ name: "get_image_info", arguments: { image: outFile } });
 assert.match(info.content[0].text, /4x4 px, formato webp/);
 
+// upscale local real: 8x8 → banner de 1cm @ 300dpi (118px), DPI gravado no arquivo
+const up = await client.callTool({
+  name: "upscale_image",
+  arguments: { image: tmpPng, width_cm: 1, dpi: 300 },
+});
+assert.notStrictEqual(up.isError, true, up.content[0].text);
+const upFile = up.content[0].text.match(/Salva em (.*\.png)/)?.[1];
+assert.ok(upFile && fs.existsSync(upFile), "arquivo ampliado não existe");
+const upMeta = await sharp(upFile).metadata();
+assert.strictEqual(upMeta.width, 118); // 1cm / 2.54 * 300dpi
+assert.strictEqual(upMeta.density, 300);
+
+// upscale que não amplia: erro claro apontando convert_image
+const upBad = await client.callTool({
+  name: "upscale_image",
+  arguments: { image: tmpPng, scale: 0.5 },
+});
+assert.strictEqual(upBad.isError, true);
+assert.match(upBad.content[0].text, /convert_image/);
+
+// scale e width_cm juntos: erro de uso
+const upBoth = await client.callTool({
+  name: "upscale_image",
+  arguments: { image: tmpPng, scale: 2, width_cm: 10 },
+});
+assert.strictEqual(upBoth.isError, true);
+
 // host_image: arquivo inexistente falha antes de qualquer upload (sem rede)
 const host = await client.callTool({
   name: "host_image",
@@ -73,5 +100,5 @@ const host = await client.callTool({
 assert.strictEqual(host.isError, true);
 
 await client.close();
-for (const f of [tmpPng, outFile]) { try { fs.rmSync(f); } catch {} } // handle pode demorar a soltar no Windows
-console.log("smoke OK: 6 tools, modelos OpenAI+Google, formatos padrão, conversão local webp, host_image validado");
+for (const f of [tmpPng, outFile, upFile]) { try { fs.rmSync(f); } catch {} } // handle pode demorar a soltar no Windows
+console.log("smoke OK: 7 tools, modelos OpenAI+Google, formatos padrão, conversão local webp, upscale com DPI, host_image validado");

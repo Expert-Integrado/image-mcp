@@ -57,6 +57,7 @@ O Claude instala tudo, oferece fazer as etapas de navegador por você, valida su
 - *"Gere com o Nano Banana uma foto de produto de uma caneca azul em fundo branco"*
 - *"Edite a foto do produto que está em Imagens/image-mcp: troque o fundo por uma praia ao pôr do sol"*
 - *"Converta essa imagem para webp"* / *"diminui essa imagem para 800px"* (grátis, sem API)
+- *"Amplia essa imagem para imprimir num banner de 4 metros de largura"* — aumenta os pixels e grava o DPI para a gráfica (grátis, sem API)
 - *"Gere um link público dessa imagem"* — hospeda de graça e devolve a URL, para plataformas que pedem o link da imagem em vez do arquivo
 - *"Quais modelos de imagem estão disponíveis?"*
 
@@ -92,7 +93,7 @@ Exemplo: *"gere em 9:16 uma arte de stories anunciando nossa mentoria"*.
 ## Para quem é técnico
 
 - **Instalação direta:** `claude mcp add --scope user -e OPENAI_API_KEY=... image-mcp -- npx -y @expertintegrado/image-mcp`
-- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `get_image_info`, `host_image` (upload gratuito para catbox.moe permanente ou litterbox temporário 1h–72h, sem API key, com fallback), `list_image_models`.
+- **Ferramentas MCP:** `generate_image`, `edit_image` (múltiplas referências + máscara nos modelos OpenAI), `convert_image` (formato/resize/compressão local via sharp, sem API), `upscale_image` (ampliação local Lanczos por fator ou tamanho físico em cm + DPI gravado no arquivo, para impressão), `get_image_info`, `host_image` (upload gratuito para catbox.moe permanente ou litterbox temporário 1h–72h, sem API key, com fallback), `list_image_models`.
 - **Envs:** `OPENAI_API_KEY`, `GEMINI_API_KEY` (pelo menos uma), `IMAGE_MCP_OUTPUT_DIR` (opcional, padrão `~/Pictures/image-mcp`).
 - **Teste:** clone o repo e rode `npm install && npm test` (smoke test via stdio, não gasta API).
 - **Adicionar provedor/modelo:** em [server.js](server.js), crie um objeto com `generate()`/`edit()` retornando array de base64, registre em `PROVIDERS` e adicione os modelos em `MODELS`. Sem SDKs de provedor — só `fetch` nativo.

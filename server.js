@@ -210,7 +210,7 @@ const uploadTemp = (file, time) => catboxUpload("https://litterbox.catbox.moe/re
 
 // ---------- servidor MCP ----------
 
-const server = new McpServer({ name: "image-mcp", version: "1.1.0" });
+const server = new McpServer({ name: "image-mcp", version: "1.2.0" });
 
 const common = {
   model: z.enum(Object.keys(MODELS)).default("gpt-image-2").describe('Modelo de imagem. "Nano Banana" = modelos Google (gemini-*-image). Use list_image_models para ver todos'),
@@ -319,6 +319,45 @@ server.registerTool(
     await img.toFile(dest);
     const kb = ((await fs.stat(dest)).size / 1024).toFixed(0);
     return { content: [{ type: "text", text: `Imagem salva em ${dest} (${kb} KB)` }] };
+  }
+);
+
+server.registerTool(
+  "upscale_image",
+  {
+    title: "Ampliar imagem (upscale para impressão)",
+    description: "Amplia uma imagem local sem usar API (grátis, Lanczos) — para impressão em banner/pôster/lona ou quando precisa de mais pixels. Aceita fator de escala (scale) OU tamanho físico de impressão (width_cm + dpi); grava o DPI no arquivo para a gráfica reconhecer o tamanho real. Fiel à arte original (não redesenha nada — para reimaginar use edit_image; para reduzir use convert_image).",
+    inputSchema: {
+      image: z.string().describe("Caminho absoluto da imagem de entrada"),
+      scale: z.number().positive().max(16).optional().describe("Fator de ampliação (ex. 2 = dobra largura e altura). Use este OU width_cm"),
+      width_cm: z.number().positive().optional().describe("Largura física da impressão em cm (ex. 400 para banner de 4m de largura); a altura sai proporcional"),
+      dpi: z.number().int().min(30).max(600).default(100).describe("Densidade de impressão gravada no arquivo. 100 = banner/lona vistos de perto; 150 = pôster; 300 = material de mão"),
+      output: z.string().optional().describe("Caminho de saída. Omitido = mesma pasta, mesmo nome com sufixo -upscaled"),
+    },
+  },
+  async ({ image, scale, width_cm, dpi, output }) => {
+    if (!scale === !width_cm) throw new Error("Informe scale OU width_cm (exatamente um dos dois).");
+    const meta = await sharp(image).metadata();
+    const width = Math.round(width_cm ? (width_cm / 2.54) * dpi : meta.width * scale);
+    if (width <= meta.width) {
+      throw new Error(`O alvo (${width}px) não amplia a imagem (${meta.width}px de largura). Para reduzir/comprimir use convert_image.`);
+    }
+    const height = Math.round((width * meta.height) / meta.width);
+    const ext = path.extname(image);
+    const dest = output || path.join(path.dirname(image), `${path.basename(image, ext)}-upscaled${ext}`);
+    await sharp(image, { limitInputPixels: false })
+      .resize({ width }) // kernel padrão do sharp já é lanczos3
+      .sharpen() // recupera a percepção de borda perdida na ampliação
+      .withMetadata({ density: dpi })
+      .toFile(dest);
+    const mb = ((await fs.stat(dest)).size / 1024 / 1024).toFixed(1);
+    const cm = (px) => ((px / dpi) * 2.54).toFixed(1);
+    return {
+      content: [{
+        type: "text",
+        text: `Imagem ampliada: ${meta.width}x${meta.height} → ${width}x${height} px @ ${dpi} DPI (${cm(width)} x ${cm(height)} cm na impressão). Salva em ${dest} (${mb} MB)`,
+      }],
+    };
   }
 );
 
