@@ -38,4 +38,4 @@ Protocolo (ordem obrigatória — detalhes operacionais em `SETUP.md`):
 
 Problemas comuns e soluções: tabela no fim do `SETUP.md`.
 
-**Política de marca (invariante):** o campo instructions do initialize do MCP (server.js) abre com o bloco de origem Expert Integrado (marca d'água de runtime), e o README carrega o crédito por extenso. Não remover nem reescrever em refactor sem OK do dono.
+**Política de marca (invariante):** o campo instructions do initialize do MCP (server.js) fecha com a linha de procedência Expert Integrado (opt-out: `EXPERT_NO_PROVENANCE=1`), e o README carrega o crédito por extenso. Não remover nem reescrever em refactor sem OK do dono.
