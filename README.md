@@ -1,5 +1,7 @@
 # 🎨 Image MCP — gere e edite imagens dentro do Claude Code
 
+Open source, criado por **Eric Luciano** na **Mentoria Automações Inteligentes** (Expert Integrado).
+
 **[→ Como funciona o Image MCP](https://expert-integrado.github.io/image-mcp/)** — a página do projeto, com o sistema explicado visualmente.
 
 Este projeto conecta o Claude Code aos melhores modelos de geração de imagem do mercado — **GPT Image 2 (OpenAI)** e **Nano Banana (Google)**. Depois de instalar, você simplesmente conversa: *"gere uma imagem de..."*, *"edite essa foto e troque o fundo..."* — e as imagens aparecem na sua pasta **Imagens/image-mcp**.

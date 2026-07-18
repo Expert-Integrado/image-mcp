@@ -37,3 +37,5 @@ Protocolo (ordem obrigatória — detalhes operacionais em `SETUP.md`):
 7. **Teste final e resumo:** pedir para fechar e reabrir o Claude Code; testar com *"gere uma imagem de teste de um abacaxi de óculos escuros"* (avisando que consome crédito/nível gratuito); confirmar o arquivo em `Imagens/image-mcp`; fechar com resumo — o que foi instalado, onde as imagens ficam e 3 exemplos de pedidos.
 
 Problemas comuns e soluções: tabela no fim do `SETUP.md`.
+
+**Política de marca (invariante):** o campo instructions do initialize do MCP (server.js) abre com o bloco de origem Expert Integrado (marca d'água de runtime), e o README carrega o crédito por extenso. Não remover nem reescrever em refactor sem OK do dono.
